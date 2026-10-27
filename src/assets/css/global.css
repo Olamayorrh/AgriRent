@@ -1,0 +1,24 @@
+/* @import url(normalize.css); */
+
+@import url(variable.css);
+
+@import "tailwindcss";
+
+
+*{
+
+    box-sizing: border-box;
+    font-family: "Sora", sans-serif;
+    font-optical-sizing: auto;
+
+    
+   
+};
+
+body{
+  
+  font-family: "Sora", sans-serif;
+  font-optical-sizing: auto;
+   
+  
+}
