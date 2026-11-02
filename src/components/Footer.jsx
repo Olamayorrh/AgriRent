@@ -27,15 +27,13 @@ const Footer = () => {
   const [contentRef, contentVisible] = useInView();
 
   return (
-    /* mobile/tablet: pt-[4rem] — no CTA overlap, so normal spacing */
-    /* lg+: pt-[20rem] — accommodates the CTA card overlapping from AboutUs */
     <div className="bg-[var(--secondary-color)] text-white pt-[4rem] lg:pt-[20rem] overflow-hidden">
-
-      {/* Main footer columns */}
       <div
         ref={contentRef}
-        className={`flex flex-col lg:flex-row justify-evenly gap-[3rem] lg:gap-0 px-[3rem] lg:px-0 pb-8 ${base} ${
-          contentVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+        className={`flex flex-col lg:flex md:grid md:grid-cols-2 lg:flex-row lg:justify-evenly gap-[3rem] lg:gap-0 px-[3rem] lg:px-0 pb-8  ${base} ${
+          contentVisible
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-10"
         }`}
       >
         <div>
@@ -61,13 +59,22 @@ const Footer = () => {
             Quick Links
           </h2>
           <div className="flex flex-col gap-4 text-[1.4rem]">
-            <a href="#" className="hover:underline hover:decoration-4 hover:decoration-[var(--primary-color)] hover:underline-offset-4">
+            <a
+              href="#"
+              className="hover:underline hover:decoration-4 hover:decoration-[var(--primary-color)] hover:underline-offset-4"
+            >
               Home
             </a>
-            <a href="#" className="hover:underline hover:decoration-2 hover:decoration-[var(--primary-color)] hover:underline-offset-4">
+            <a
+              href="#"
+              className="hover:underline hover:decoration-2 hover:decoration-[var(--primary-color)] hover:underline-offset-4"
+            >
               About Us
             </a>
-            <a href="#" className="hover:underline hover:decoration-2 hover:decoration-[var(--primary-color)] hover:underline-offset-4">
+            <a
+              href="#"
+              className="hover:underline hover:decoration-2 hover:decoration-[var(--primary-color)] hover:underline-offset-4"
+            >
               How it Works
             </a>
           </div>
@@ -78,13 +85,22 @@ const Footer = () => {
             For User
           </h2>
           <div className="flex flex-col gap-4 text-[1.4rem]">
-            <a href="#" className="hover:underline hover:decoration-2 hover:decoration-[var(--primary-color)] hover:underline-offset-4">
+            <a
+              href="#"
+              className="hover:underline hover:decoration-2 hover:decoration-[var(--primary-color)] hover:underline-offset-4"
+            >
               Farmer
             </a>
-            <a href="#" className="hover:underline hover:decoration-2 hover:decoration-[var(--primary-color)] hover:underline-offset-4">
+            <a
+              href="#"
+              className="hover:underline hover:decoration-2 hover:decoration-[var(--primary-color)] hover:underline-offset-4"
+            >
               Equipment Owner
             </a>
-            <a href="#" className="hover:underline hover:decoration-2 hover:decoration-[var(--primary-color)] hover:underline-offset-4">
+            <a
+              href="#"
+              className="hover:underline hover:decoration-2 hover:decoration-[var(--primary-color)] hover:underline-offset-4"
+            >
               Register
             </a>
           </div>
@@ -108,7 +124,7 @@ const Footer = () => {
               +254790 000 111
             </a>
             <a
-              href="https://maps.google.com/?q=764+Agrirent+park+Nairobi+Kenya"
+              href="#"
               target="_blank"
               rel="noreferrer"
               className="hover:underline hover:decoration-2 hover:decoration-[var(--primary-color)] hover:underline-offset-4"
@@ -119,8 +135,7 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Bottom bar */}
-      <div className="border-t border-white mx-10">
+      <div className="border-t border-white ">
         <div className="flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-[10%] py-8 text-[1.4rem]">
           <p>&copy; 2026 Agrirent &amp; FarmHub</p>
           <p>All rights reserved</p>

@@ -43,12 +43,13 @@ const Hero = () => {
       className="relative w-full h-full pt-[4rem] px-[2rem] lg:pt-[10.8rem] lg:pl-[4.9rem] lg:pr-0 bg-cover bg-center overflow-hidden"
       style={{ backgroundImage: `url(${background})` }}
     >
-      {/* Hero text + image */}
-      <div className="w-full flex flex-col lg:flex-row p-2">
+      <div className="w-full flex flex-col md:flex-row lg:flex-row p-2">
         <div
           ref={heroTextRef}
           className={`w-full lg:w-[50%] flex flex-col text-[2.2rem] lg:text-[3.5rem] text-white ${base} ${
-            heroTextVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-12"
+            heroTextVisible
+              ? "opacity-100 translate-x-0"
+              : "opacity-0 -translate-x-12"
           }`}
         >
           <div>
@@ -71,31 +72,40 @@ const Hero = () => {
 
         <div
           ref={heroImgRef}
-          className={`w-full lg:w-[50%] mt-4 lg:mt-0 ${base} delay-200 ${
-            heroImgVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-12"
+          className={`w-full md:w-[50%] lg:w-[50%] mt-4 lg:mt-0 ${base} delay-200 ${
+            heroImgVisible
+              ? "opacity-100 translate-x-0"
+              : "opacity-0 translate-x-12"
           }`}
         >
           <img src={machine1} alt="machine" className="w-full" />
         </div>
       </div>
 
-      {/* Farmer / Equipment Owner cards */}
       <div
         ref={cardsRef}
         className="relative z-10 flex flex-col lg:flex-row gap-4 lg:gap-[5%] w-full mt-4 lg:mt-0"
       >
         <div
           className={`border rounded-2xl w-full lg:w-[45%] bg-[var(--primary-color)] text-[var(--secondary-color)] p-[2rem] ${base} ${
-            cardsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+            cardsVisible
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-12"
           }`}
         >
-          <div className="w-[20%]">
-            <img src={logo1} alt="logo image" />
+          <div className="">
+            <img
+              src={logo1}
+              alt="logo image"
+              className="w-[5%] md:w-[8%] lg:w-[20%]"
+            />
           </div>
 
-          <div className="mt-[3.0rem] text-[1.2rem]">
-            <p className="text-[2rem] lg:text-[2.5rem]">I'm a Farmer</p>
-            <span className="flex items-center gap-4 mt-[0.5rem]">
+          <div className="mt-[3.0rem] text-[2rem]">
+            <p className=" lg:text-[2.5rem] text-[1.2rem] font-bold">
+              I'm a Farmer
+            </p>
+            <span className="flex items-center gap-[20%] mt-[0.5rem] text-[1rem]">
               Rent machinery and manage your farm plots
               <a href="">
                 <img className="w-[2.0rem]" src={arrow} alt="learn more" />
@@ -106,16 +116,24 @@ const Hero = () => {
 
         <div
           className={`border-2 border-white rounded-2xl w-full lg:w-[45%] text-white p-[2rem] ${base} delay-150 ${
-            cardsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+            cardsVisible
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-12"
           }`}
         >
-          <div className="w-[20%]">
-            <img src={logo2} alt="logo image" />
+          <div className="">
+            <img
+              src={logo2}
+              alt="logo image"
+              className="w-[5%] md:w-[8%] lg:w-[20%]"
+            />
           </div>
 
-          <div className="mt-[3.0rem] text-[1.2rem]">
-            <p className="text-[2rem] lg:text-[2.5rem]">I'm an Equipment Owner</p>
-            <p className="flex items-center gap-[20%] mt-[0.5rem]">
+          <div className="mt-[3.0rem] text-[2rem] text-[var(--secondary-color)">
+            <p className="text-[1.2rem] lg:text-[2.5rem] font-bold">
+              I'm an Equipment Owner
+            </p>
+            <p className="flex items-center gap-[20%] mt-[0.5rem] text-[1rem]">
               List assets and earn income
               <a href="">
                 <img className="w-[2.0rem]" src={arrow2} alt="learn more" />
@@ -125,11 +143,12 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Trust badges */}
       <div
         ref={badgesRef}
         className={`flex flex-wrap gap-6 lg:gap-[20%] py-6 text-[1.2rem] lg:text-[1.4rem] items-center text-white w-full mt-[4rem] lg:mt-[10rem] ${base} delay-300 ${
-          badgesVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          badgesVisible
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-8"
         }`}
       >
         <div className="flex items-center gap-6">

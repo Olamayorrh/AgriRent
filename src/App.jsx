@@ -1,6 +1,11 @@
 import React from "react";
 import "./assets/css/global.css";
+import SignUpLogin from "./pages/SignUpLogin";
+import { Route, Routes } from "react-router";
 import LandingPage from "./pages/LandingPage";
+import FarmerDashboard from "./pages/FarmerDashboard";
+import EquipOwner from "./pages/EquipOwner";
+
 
 
 
@@ -11,7 +16,13 @@ import LandingPage from "./pages/LandingPage";
 const App = () => {
   return (
     <div className="overflow-x-hidden">
-       <LandingPage />
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<SignUpLogin />} />
+        <Route path="/signup" element={<SignUpLogin />} />
+        <Route path="/FarmerDashboard" element={<FarmerDashboard />} />
+        <Route path="/EquipOwnerDashboard" element={<EquipOwner />}/>
+      </Routes>
     </div>
   );
 };

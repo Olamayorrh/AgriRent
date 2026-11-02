@@ -6,7 +6,7 @@ import equiplogo1 from "../assets/images/equip1.png";
 import equiplogo2 from "../assets/images/equip2.png";
 import equiplogo3 from "../assets/images/equip3.png";
 
-/* ─── Custom hook: fires once when element enters the viewport ─── */
+
 const useInView = (threshold = 0.15) => {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -16,7 +16,7 @@ const useInView = (threshold = 0.15) => {
       ([entry]) => {
         if (entry.isIntersecting) {
           setVisible(true);
-          observer.disconnect(); // animate only once
+          observer.disconnect(); 
         }
       },
       { threshold }
@@ -28,10 +28,10 @@ const useInView = (threshold = 0.15) => {
   return [ref, visible];
 };
 
-/* ─── Shared transition base ─── */
+
 const base = "transition-all duration-700 ease-out";
 
-/* Direction helpers — start hidden, animate to visible */
+
 const from = {
   top:    (v) => `${base} ${v ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-10"}`,
   bottom: (v) => `${base} ${v ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`,
@@ -82,20 +82,20 @@ const ValueProposition = () => {
     },
   ];
 
-  /* ── Refs for each animated section ── */
+  
   const [headingRef, headingVisible]         = useInView();
   const [farmerTitleRef, farmerTitleVisible] = useInView();
   const [equipTitleRef, equipTitleVisible]   = useInView();
 
-  /* Per-item refs for farmer items (bottom stagger) */
+  
   const farmerRefs = farmer.map(() => useInView(0.1));
-  /* Per-item refs for equipment items (bottom stagger) */
+ 
   const equipRefs  = equipOwners.map(() => useInView(0.1));
 
   return (
     <div className="w-full">
 
-      {/* ── Heading — slides in from top ── */}
+     
       <div
         ref={headingRef}
         className={`w-full text-center p-[2rem] lg:p-[5.0rem] text-[1.8rem] lg:text-[2.5rem] text-[var(--secondary-color)] ${from.top(headingVisible)}`}
@@ -105,10 +105,10 @@ const ValueProposition = () => {
 
       <div className="w-full flex flex-col lg:flex-row bg-[#8A928D80]">
 
-        {/* ══ For Farmers — slides in from LEFT ══ */}
+        
         <div className="w-full lg:w-[50%] lg:border-r flex flex-col items-center lg:items-start">
 
-          {/* Section pill — from left */}
+          
           <div
             ref={farmerTitleRef}
             className={`text-center text-[1.8rem] lg:text-[2.5rem] flex justify-center w-full my-[1.5rem] ${from.left(farmerTitleVisible)}`}
@@ -118,7 +118,7 @@ const ValueProposition = () => {
             </h2>
           </div>
 
-          {/* Items — slide from bottom with stagger via delay */}
+          
           <div className="p-2 flex flex-col items-center lg:items-start w-full">
             {farmer.map((value, i) => {
               const [ref, visible] = farmerRefs[i];
@@ -150,10 +150,10 @@ const ValueProposition = () => {
           </div>
         </div>
 
-        {/* ══ For Equipment Owners — slides in from RIGHT ══ */}
+        
         <div className="w-full lg:w-[50%] flex flex-col items-center lg:items-start border-t lg:border-t-0">
 
-          {/* Section pill — from right */}
+          
           <div
             ref={equipTitleRef}
             className={`text-center text-[1.8rem] lg:text-[2.5rem] flex justify-center w-full my-[1.5rem] ${from.right(equipTitleVisible)}`}
@@ -163,7 +163,7 @@ const ValueProposition = () => {
             </h2>
           </div>
 
-          {/* Items — slide from bottom with stagger */}
+          
           <div className="p-2 flex flex-col items-center lg:items-start w-full">
             {equipOwners.map((value, i) => {
               const [ref, visible] = equipRefs[i];
