@@ -8,7 +8,14 @@ import {
 } from "./FarmerIcons";
 import { createRentalRequest } from "../../services/equipmentService";
 
-const FarmerBookingModal = ({ isOpen, onClose, equipment, currentUser, onBookingSuccess }) => {
+const FarmerBookingModal = ({
+  isOpen,
+  onClose,
+  equipment,
+  currentUser,
+  onBookingSuccess,
+  onBookingError,
+}) => {
   
   const getTomorrowDate = () => {
     const d = new Date();
@@ -109,20 +116,20 @@ const FarmerBookingModal = ({ isOpen, onClose, equipment, currentUser, onBooking
     };
 
     try {
-      
       const newRequest = await createRentalRequest(requestPayload);
 
-      toast.success(
-        `Rental request for ${equipment.name} submitted successfully! Awaiting owner confirmation.`
-      );
-
+      onClose();
       if (onBookingSuccess) {
         onBookingSuccess(newRequest);
       }
-      onClose();
     } catch (error) {
       console.error("Booking error:", error);
-      toast.error("Failed to submit rental request. Please try again.");
+      onClose();
+      if (onBookingError) {
+        onBookingError(error, requestPayload);
+      } else {
+        toast.error("Failed to submit rental request. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }

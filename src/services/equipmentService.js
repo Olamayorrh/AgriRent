@@ -307,12 +307,13 @@ export const fetchMarketplaceEquipments = async () => {
     const liveItems = Array.isArray(data) ? data.map(normalizeLiveEquipment) : [];
     const liveIds = new Set(liveItems.map((e) => e.id));
 
-    // Merge: live items first, then mock items that don't share the same ID
-    const mockItems = DEFAULT_EQUIPMENTS.filter((e) => !liveIds.has(e.id));
+    // Merge: live items first, then local/mock items that don't share the same ID
+    const localEquipments = getEquipments();
+    const mockItems = localEquipments.filter((e) => !liveIds.has(e.id));
     return [...liveItems, ...mockItems];
   } catch (error) {
     console.warn("[MARKETPLACE] Live API fetch failed, using mock catalog:", error.message);
-    return DEFAULT_EQUIPMENTS;
+    return getEquipments();
   }
 };
 
@@ -327,16 +328,75 @@ export const addEquipment = (equipmentData) => {
     const list = getEquipments();
     const newEquipment = {
       ...equipmentData,
-      id: `EQ-${Date.now().toString().slice(-4)}`,
-      available: true,
+      id: equipmentData.id || `EQ-${Date.now().toString().slice(-4)}`,
+      available: equipmentData.available !== undefined ? equipmentData.available : true,
       rating: 5.0,
       reviewsCount: 0,
+      createdAt: new Date().toISOString(),
     };
     list.unshift(newEquipment);
     localStorage.setItem(STORAGE_KEY_EQUIPMENTS, JSON.stringify(list));
     return newEquipment;
   } catch (error) {
     console.error("Error adding equipment:", error);
+    return null;
+  }
+};
+
+/**
+ * Update existing equipment post (name, price, location, specs, availability, etc.)
+ */
+export const updateEquipment = (equipmentId, updatedData) => {
+  try {
+    const list = getEquipments();
+    const index = list.findIndex((item) => item.id === equipmentId);
+    if (index === -1) {
+      console.warn(`Equipment ${equipmentId} not found for update`);
+      return null;
+    }
+    const updatedItem = {
+      ...list[index],
+      ...updatedData,
+      updatedAt: new Date().toISOString(),
+    };
+    list[index] = updatedItem;
+    localStorage.setItem(STORAGE_KEY_EQUIPMENTS, JSON.stringify(list));
+    return updatedItem;
+  } catch (error) {
+    console.error("Error updating equipment:", error);
+    return null;
+  }
+};
+
+/**
+ * Delete an equipment post
+ */
+export const deleteEquipment = (equipmentId) => {
+  try {
+    const list = getEquipments();
+    const filtered = list.filter((item) => item.id !== equipmentId);
+    localStorage.setItem(STORAGE_KEY_EQUIPMENTS, JSON.stringify(filtered));
+    return true;
+  } catch (error) {
+    console.error("Error deleting equipment:", error);
+    return false;
+  }
+};
+
+/**
+ * Quick toggle for equipment availability
+ */
+export const toggleEquipmentAvailability = (equipmentId) => {
+  try {
+    const list = getEquipments();
+    const item = list.find((e) => e.id === equipmentId);
+    if (!item) return null;
+    item.available = !item.available;
+    item.updatedAt = new Date().toISOString();
+    localStorage.setItem(STORAGE_KEY_EQUIPMENTS, JSON.stringify(list));
+    return item;
+  } catch (error) {
+    console.error("Error toggling equipment availability:", error);
     return null;
   }
 };

@@ -9,6 +9,7 @@ import FarmerRequests from "../components/farmer/FarmerRequests.jsx";
 import FarmerPlots from "../components/farmer/FarmerPlots.jsx";
 import FarmerSettings from "../components/farmer/FarmerSettings.jsx";
 import FarmerBookingModal from "../components/farmer/FarmerBookingModal.jsx";
+import FarmerBookingConfirmationModal from "../components/farmer/FarmerBookingConfirmationModal.jsx";
 import {
   fetchMarketplaceEquipments,
   getRentalRequests,
@@ -30,6 +31,14 @@ const FarmerDashboard = () => {
   // Booking Modal state
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [selectedEquipmentForBooking, setSelectedEquipmentForBooking] = useState(null);
+
+  // Booking Confirmation / Error Screen Popup state
+  const [confirmationState, setConfirmationState] = useState({
+    isOpen: false,
+    isError: false,
+    errorMessage: "",
+    bookingData: null,
+  });
 
   // Fallback demo user if accessed directly without logging in
   const activeUser = currentUser || {
@@ -75,10 +84,40 @@ const FarmerDashboard = () => {
     setIsBookingModalOpen(true);
   };
 
-  // When a booking is placed, refresh requests and navigate to My Requests tab
-  const handleBookingSuccess = () => {
+  // When a booking is placed, refresh requests and show confirmation screen
+  const handleBookingSuccess = (newRequest) => {
     loadData();
+    setConfirmationState({
+      isOpen: true,
+      isError: false,
+      errorMessage: "",
+      bookingData: newRequest || selectedEquipmentForBooking,
+    });
+  };
+
+  // When a booking fails, display the error screen
+  const handleBookingError = (error, requestPayload) => {
+    setConfirmationState({
+      isOpen: true,
+      isError: true,
+      errorMessage:
+        error?.response?.data?.message ||
+        error?.message ||
+        "Unable to connect to the rental database. Please verify your dates and internet connection.",
+      bookingData: requestPayload || selectedEquipmentForBooking,
+    });
+  };
+
+  // Track booking action from confirmation popup
+  const handleTrackBooking = () => {
+    setConfirmationState((prev) => ({ ...prev, isOpen: false }));
     setActiveNav("my-requests");
+  };
+
+  // Retry booking action from error popup
+  const handleRetryBooking = () => {
+    setConfirmationState((prev) => ({ ...prev, isOpen: false }));
+    setIsBookingModalOpen(true);
   };
 
   // Count pending requests for notifications / badges
@@ -196,6 +235,18 @@ const FarmerDashboard = () => {
         equipment={selectedEquipmentForBooking}
         currentUser={activeUser}
         onBookingSuccess={handleBookingSuccess}
+        onBookingError={handleBookingError}
+      />
+
+      {/* Booking Confirmation / Failure Status Popup */}
+      <FarmerBookingConfirmationModal
+        isOpen={confirmationState.isOpen}
+        onClose={() => setConfirmationState((prev) => ({ ...prev, isOpen: false }))}
+        isError={confirmationState.isError}
+        errorMessage={confirmationState.errorMessage}
+        bookingData={confirmationState.bookingData}
+        onTrackBooking={handleTrackBooking}
+        onRetry={handleRetryBooking}
       />
     </div>
   );
