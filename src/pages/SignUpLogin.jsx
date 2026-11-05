@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import logo from "../assets/images/Logo.png";
 import arrow from "../assets/images/arrowLeft.png";
 import icon1 from "../assets/images/farmIcon.png";
@@ -15,18 +15,17 @@ import { userContext } from "../components/Context.jsx";
 import SuccessModal from "../components/SuccessModal.jsx";
 
 const SignUpLogin = () => {
-  const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isLoginPage = location.pathname === "/login";
+  const isLogin = location.pathname === "/login";
 
- 
   const {
     data,
     isFarmer,
+    isLoading,
     handleInput,
     handleRoleSelect,
     handleSignup,
@@ -34,10 +33,6 @@ const SignUpLogin = () => {
     showSuccessModal,
     handleContinueToLogin,
   } = useContext(userContext);
-
-  useEffect(() => {
-    setIsLogin(isLoginPage);
-  }, [isLoginPage]);
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-3 sm:p-6 lg:p-10 bg-[#f4f7f4]">
@@ -440,9 +435,17 @@ const SignUpLogin = () => {
             <div className="my-3 sm:my-4 w-full">
               <button
                 type="submit"
-                className="w-full py-3 sm:py-3.5 bg-[var(--secondary-color)] hover:bg-[#122b1d] text-sm sm:text-base font-semibold text-white rounded-xl shadow-md transition-all cursor-pointer"
+                disabled={isLoading}
+                className="w-full py-3 sm:py-3.5 bg-[var(--secondary-color)] hover:bg-[#122b1d] disabled:opacity-60 text-sm sm:text-base font-semibold text-white rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
               >
-                {isLogin ? "Log In" : "Sign Up"}
+                {isLoading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <span>{isLogin ? "Signing in..." : "Creating account..."}</span>
+                  </>
+                ) : (
+                  <span>{isLogin ? "Log In" : "Sign Up"}</span>
+                )}
               </button>
             </div>
 
