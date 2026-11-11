@@ -11,11 +11,13 @@ import OwnerSettings from "../components/owner/OwnerSettings.jsx";
 import OwnerPostModal from "../components/owner/OwnerPostModal.jsx";
 import {
   getEquipments,
+  fetchMarketplaceEquipments,
   addEquipment,
   updateEquipment,
   deleteEquipment,
   toggleEquipmentAvailability,
   getRentalRequests,
+  fetchAllRentalRequests,
 } from "../services/equipmentService.js";
 
 const EquipOwner = () => {
@@ -45,28 +47,45 @@ const EquipOwner = () => {
     businessName: "Danladi Agro Machinery Hub",
   };
 
-  // Reload all fleet and request data from service
-  const reloadData = () => {
+  // Reload all fleet and request data from service and backend
+  const reloadData = async () => {
     setIsLoading(true);
     try {
-      const eqList = getEquipments();
-      const reqList = getRentalRequests();
+      // 1. Fetch fleet (combines live backend and locally stored owner postings)
+      const allEquipments = await fetchMarketplaceEquipments();
+      const reqList = await fetchAllRentalRequests();
 
-      // Filter fleet belonging to this owner
-      const ownerFleet = eqList.filter(
-        (e) =>
-          (e.ownerEmail && e.ownerEmail.toLowerCase() === activeUser.email?.toLowerCase()) ||
-          (e.ownerName && e.ownerName.toLowerCase() === activeUser.name?.toLowerCase())
-      );
-      const ownerEquipmentIds = new Set(ownerFleet.map((e) => e.id));
+      const ownerEmail = (activeUser.email || "").toLowerCase().trim();
+      const ownerName = (activeUser.name || activeUser.full_name || "").toLowerCase().trim();
+      const ownerId = String(activeUser.id || "");
 
-      // Filter requests sent specifically for this owner's machinery (empty by default for newly onboarded owners)
-      const ownerRequests = reqList.filter(
-        (r) =>
-          (r.ownerEmail && r.ownerEmail.toLowerCase() === activeUser.email?.toLowerCase()) ||
-          (r.ownerName && r.ownerName.toLowerCase() === activeUser.name?.toLowerCase()) ||
-          (r.equipmentId && ownerEquipmentIds.has(r.equipmentId))
-      );
+      // Filter fleet belonging strictly to this owner
+      const ownerFleet = allEquipments.filter((e) => {
+        const eEmail = (e.ownerEmail || "").toLowerCase().trim();
+        const eName = (e.ownerName || "").toLowerCase().trim();
+        const eProviderId = String(e.provider_id || e.providerId || e.ownerId || "");
+        return (
+          (ownerEmail && eEmail === ownerEmail) ||
+          (ownerName && eName === ownerName) ||
+          (ownerId && eProviderId && eProviderId === ownerId)
+        );
+      });
+      const ownerEquipmentIds = new Set(ownerFleet.map((e) => String(e.id)));
+
+      // Filter requests sent specifically for this owner's machinery
+      const ownerRequests = reqList.filter((r) => {
+        const rOwnerEmail = (r.ownerEmail || "").toLowerCase().trim();
+        const rOwnerName = (r.ownerName || "").toLowerCase().trim();
+        const rProviderId = String(r.provider_id || "");
+        const rEqId = String(r.equipmentId || "");
+
+        const matchesDirectEmail = ownerEmail && rOwnerEmail && rOwnerEmail === ownerEmail;
+        const matchesDirectName = ownerName && rOwnerName && rOwnerName === ownerName;
+        const matchesProviderId = ownerId && rProviderId && rProviderId === ownerId;
+        const matchesEquipment = rEqId && ownerEquipmentIds.has(rEqId);
+
+        return matchesDirectEmail || matchesDirectName || matchesProviderId || matchesEquipment;
+      });
 
       setMyEquipments(ownerFleet);
       setRequests(ownerRequests);
@@ -77,9 +96,23 @@ const EquipOwner = () => {
     }
   };
 
-  // Initial load on mount
+  // Initial load on mount, tab changes, and cross-tab sync
   useEffect(() => {
     reloadData();
+  }, [activeNav]);
+
+  useEffect(() => {
+    const handleSync = () => reloadData();
+    window.addEventListener("storage", handleSync);
+    window.addEventListener("focus", handleSync);
+    window.addEventListener("agrirent_equipment_updated", handleSync);
+    window.addEventListener("agrirent_request_created", handleSync);
+    return () => {
+      window.removeEventListener("storage", handleSync);
+      window.removeEventListener("focus", handleSync);
+      window.removeEventListener("agrirent_equipment_updated", handleSync);
+      window.removeEventListener("agrirent_request_created", handleSync);
+    };
   }, []);
 
   // Logout handler
@@ -106,11 +139,11 @@ const EquipOwner = () => {
   };
 
   // Handle post submit (both add and edit)
-  const handleSubmitEquipment = (equipmentData, isEditing) => {
+  const handleSubmitEquipment = async (equipmentData, isEditing) => {
     if (isEditing && equipmentData.id) {
       updateEquipment(equipmentData.id, equipmentData);
     } else {
-      addEquipment(equipmentData);
+      await addEquipment(equipmentData);
     }
     reloadData();
   };

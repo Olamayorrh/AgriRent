@@ -55,16 +55,36 @@ const FarmerDashboard = () => {
     setRequests(loadedRequests);
   };
 
-  // Fetch equipment listings from live API + local mock catalog on mount
-  useEffect(() => {
+  // Reload equipment catalog from service & live API
+  const loadEquipments = () => {
     setEquipmentsLoading(true);
     fetchMarketplaceEquipments()
       .then((items) => setEquipments(items))
       .catch(() => {
-        // fetchMarketplaceEquipments already falls back to mock catalog on failure
         setEquipments([]);
       })
       .finally(() => setEquipmentsLoading(false));
+  };
+
+  // Re-fetch equipment whenever active navigation tab changes
+  useEffect(() => {
+    loadEquipments();
+  }, [activeNav]);
+
+  // Listen to window focus, cross-tab storage, and equipment post events
+  useEffect(() => {
+    const handleSync = () => {
+      loadEquipments();
+      loadData();
+    };
+    window.addEventListener("storage", handleSync);
+    window.addEventListener("focus", handleSync);
+    window.addEventListener("agrirent_equipment_updated", handleSync);
+    return () => {
+      window.removeEventListener("storage", handleSync);
+      window.removeEventListener("focus", handleSync);
+      window.removeEventListener("agrirent_equipment_updated", handleSync);
+    };
   }, []);
 
   // Logout handler routing back to landing page

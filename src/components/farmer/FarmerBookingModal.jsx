@@ -95,6 +95,7 @@ const FarmerBookingModal = ({
       ownerName: equipment.ownerName,
       ownerEmail: equipment.ownerEmail,
       ownerPhone: equipment.ownerPhone,
+      provider_id: equipment.provider_id || equipment.providerId || equipment.ownerId,
       location: equipment.location,
       farmerName: currentUser?.name || currentUser?.full_name || "Farmer User",
       farmerEmail: currentUser?.email || "farmer@agrirent.com",

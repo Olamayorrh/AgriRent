@@ -316,24 +316,6 @@ const FarmerRequests = ({ requests = [], onRefreshRequests, onNavigate }) => {
                           Mark Rental Completed
                         </button>
                       )}
-
-                      {/* Demo Simulator: Lets user preview status changes from Owner end */}
-                      <div className="pt-2 border-t border-gray-100 w-full">
-                        <label className="block text-[10px] font-semibold text-gray-400 mb-1 lg:text-right">
-                          Simulate Owner Response:
-                        </label>
-                        <select
-                          value={req.status}
-                          onChange={(e) => handleOwnerStatusChange(req.id, e.target.value)}
-                          className="w-full text-[11px] font-medium bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-gray-700 cursor-pointer"
-                        >
-                          <option value="Pending">Pending Review</option>
-                          <option value="Approved">Approve Request</option>
-                          <option value="In Use">Set In Field (Active)</option>
-                          <option value="Completed">Set Completed</option>
-                          <option value="Declined">Decline Request</option>
-                        </select>
-                      </div>
                     </div>
                   </div>
                 </div>

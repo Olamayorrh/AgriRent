@@ -27,8 +27,8 @@ const FarmerOverview = ({
   ).length;
 
   // Available equipments list
-  const availableEquipments = equipments.filter((e) => e.available !== false);
-  const featuredEquipments = equipments.slice(0, 3);
+  const availableEquipments = equipments.filter((e) => e && e.available !== false);
+  const featuredEquipments = equipments.filter(Boolean).slice(0, 3);
   const recentRequests = requests.slice(0, 4);
 
   const getStatusBadge = (status) => {

@@ -35,11 +35,10 @@ export const getEquipments = () => {
       return [];
     }
     const items = JSON.parse(stored);
-    // Purge legacy mock equipments (EQ-101 to EQ-106) and any backend dummy ids
+    // Purge legacy mock equipments (EQ-101 to EQ-106)
     const cleaned = items.filter(
       (item) =>
         item &&
-        item.id !== "6e4de458-ff55-42b9-96f1-41793130cdef" &&
         !["EQ-101", "EQ-102", "EQ-103", "EQ-104", "EQ-105", "EQ-106"].includes(item.id)
     );
     if (cleaned.length !== items.length) {
@@ -70,72 +69,175 @@ export const resolveEquipmentImage = (equipmentType) => {
  * Normalize a live API equipment item to the shape used by the UI
  * Maps API field names (snake_case) → UI field names (camelCase)
  */
-const normalizeLiveEquipment = (apiItem) => ({
-  id: apiItem.id,
-  provider_id: apiItem.provider_id,
-  name: apiItem.equipment_type || "Agricultural Equipment",
-  category: (apiItem.equipment_type || "").split(" - ")[0] || "Tractor",
-  ownerName: apiItem.provider_name || "Equipment Owner",
-  ownerPhone: apiItem.provider_phone || "+234 800 000 0000",
-  ownerEmail: apiItem.provider_email || apiItem.email || "",
-  location: apiItem.service_area || "Nigeria",
-  dailyRate: apiItem.base_price || 0,
-  priceBasis: apiItem.price_basis || "per_day",
-  specs: {
-    ...(apiItem.includes_operator !== undefined && {
-      operator: apiItem.includes_operator ? "Included" : "Not Included",
-    }),
-    ...(apiItem.includes_fuel !== undefined && {
-      fuel: apiItem.includes_fuel ? "Fuel Included" : "Fuel Extra",
-    }),
-  },
-  condition: "Good",
-  available: apiItem.is_active !== false,
-  rating: null,
-  reviewsCount: null,
-  image: apiItem.image_url || apiItem.image || resolveEquipmentImage(apiItem.equipment_type),
-  description:
-    apiItem.description ||
-    "Agricultural equipment available for hire. Contact owner for details.",
-  _source: "live",
-});
+export const normalizeLiveEquipment = (apiItem) => {
+  if (!apiItem) return null;
+
+  const id = String(apiItem.id || apiItem._id || apiItem.equipment_id || `EQ-${Date.now()}`);
+  const rawName =
+    apiItem.equipment_type ||
+    apiItem.name ||
+    apiItem.title ||
+    apiItem.equipment_name ||
+    apiItem.model ||
+    "Agricultural Equipment";
+
+  // Clean name if format is "Tractor - Massey Ferguson"
+  const nameParts = typeof rawName === "string" ? rawName.split(" - ") : [rawName];
+  const category =
+    apiItem.category ||
+    (nameParts.length > 1 ? nameParts[0].trim() : null) ||
+    (typeof rawName === "string" ? rawName.split(" ")[0].trim() : null) ||
+    "Tractor";
+
+  const displayName = nameParts.length > 1 ? nameParts.slice(1).join(" - ").trim() : rawName;
+
+  const ownerName =
+    apiItem.provider_name ||
+    apiItem.providerName ||
+    apiItem.owner_name ||
+    apiItem.ownerName ||
+    apiItem.provider?.full_name ||
+    apiItem.provider?.name ||
+    "Equipment Owner";
+
+  const ownerPhone =
+    apiItem.provider_phone ||
+    apiItem.providerPhone ||
+    apiItem.phone ||
+    apiItem.phone_number ||
+    apiItem.provider?.phone_number ||
+    "+234 800 000 0000";
+
+  const ownerEmail =
+    apiItem.provider_email ||
+    apiItem.providerEmail ||
+    apiItem.email ||
+    apiItem.provider?.email ||
+    "";
+
+  const location =
+    apiItem.service_area ||
+    apiItem.location ||
+    apiItem.state ||
+    apiItem.address ||
+    "Nigeria";
+
+  const dailyRate = Number(
+    apiItem.base_price ||
+    apiItem.dailyRate ||
+    apiItem.daily_rate ||
+    apiItem.price ||
+    apiItem.rate ||
+    0
+  );
+
+  const priceBasis = apiItem.price_basis || apiItem.priceBasis || "per_day";
+
+  const available =
+    apiItem.is_active !== false &&
+    apiItem.is_available !== false &&
+    apiItem.available !== false &&
+    apiItem.status !== "inactive" &&
+    apiItem.status !== "maintenance";
+
+  const image =
+    apiItem.image_url ||
+    apiItem.imageUrl ||
+    apiItem.image ||
+    resolveEquipmentImage(rawName || category);
+
+  return {
+    id,
+    provider_id: apiItem.provider_id || apiItem.providerId || apiItem.owner_id || apiItem.ownerId,
+    name: displayName || rawName,
+    category,
+    ownerName,
+    ownerPhone,
+    ownerEmail,
+    location,
+    dailyRate,
+    priceBasis,
+    specs: {
+      power: apiItem.power || apiItem.specs?.power || "Standard",
+      fuel: apiItem.fuel || apiItem.specs?.fuel || "Diesel",
+      ...(apiItem.includes_operator !== undefined && {
+        operator: apiItem.includes_operator ? "Included" : "Not Included",
+      }),
+      ...(apiItem.includes_fuel !== undefined && {
+        fuel: apiItem.includes_fuel ? "Fuel Included" : "Fuel Extra",
+      }),
+      ...(apiItem.specs || {}),
+    },
+    condition: apiItem.condition || "Good",
+    available,
+    rating: apiItem.rating || 5.0,
+    reviewsCount: apiItem.reviewsCount || 0,
+    image,
+    description:
+      apiItem.description ||
+      `Agricultural equipment available for hire in ${location}. Contact owner for details.`,
+    _source: "live",
+  };
+};
 
 /**
  * Fetch equipment listings for marketplace.
  * Connects to live API and merges with owner-posted equipments from local storage,
- * while strictly filtering out legacy dummy data so the marketplace starts clean
- * with only genuine owner-posted machinery.
+ * while filtering out legacy mock items (EQ-101 to EQ-106).
  */
 export const fetchMarketplaceEquipments = async () => {
+  const localEquipments = getEquipments();
+  let liveItems = [];
+
+  // Try fetching from the live backend API
   try {
-    const response = await fetch(`${API_BASE_URL}/api/v1/equipment`);
+    let response = await fetch(`${API_BASE_URL}/api/v1/equipment`);
+    if (!response.ok && response.status === 404) {
+      response = await fetch(`${API_BASE_URL}/api/v1/equipments`);
+    }
+
     if (response.ok) {
       const data = await response.json();
-      // Exclude the stubborn hardcoded dummy equipment from backend
-      const liveItems = Array.isArray(data)
+      console.log("<<< [MARKETPLACE] Live API response:", data);
+
+      const rawList = Array.isArray(data)
         ? data
-            .filter((item) => item.id !== "6e4de458-ff55-42b9-96f1-41793130cdef")
-            .map(normalizeLiveEquipment)
+        : Array.isArray(data?.data)
+        ? data.data
+        : Array.isArray(data?.equipments)
+        ? data.equipments
+        : Array.isArray(data?.equipment)
+        ? data.equipment
+        : Array.isArray(data?.results)
+        ? data.results
+        : Array.isArray(data?.items)
+        ? data.items
         : [];
-      const liveIds = new Set(liveItems.map((e) => e.id));
-      const localEquipments = getEquipments();
-      const nonDuplicateLocal = localEquipments.filter((e) => !liveIds.has(e.id));
-      return [...liveItems, ...nonDuplicateLocal];
+
+      liveItems = rawList
+        .filter(
+          (item) =>
+            item &&
+            !["EQ-101", "EQ-102", "EQ-103", "EQ-104", "EQ-105", "EQ-106"].includes(item.id)
+        )
+        .map(normalizeLiveEquipment)
+        .filter(Boolean);
     }
-    return getEquipments();
   } catch (error) {
-    console.warn("[MARKETPLACE] Live API fetch failed, using local catalog:", error.message);
-    return getEquipments();
+    console.warn("[MARKETPLACE] Live API fetch warning, using local catalog:", error.message);
   }
+
+  // Merge live items with local items (avoiding duplicates by id)
+  const liveIds = new Set(liveItems.map((e) => String(e.id)));
+  const nonDuplicateLocal = localEquipments.filter((e) => !liveIds.has(String(e.id)));
+  return [...liveItems, ...nonDuplicateLocal];
 };
 
 /**
- * Add new equipment (will be called from Equipment Owner dashboard)
- * NOTE: When backend API is ready, replace with:
- * const response = await axios.post(`${API_BASE_URL}/equipments`, equipmentData);
- * return response.data;
+ * Add new equipment (called from Equipment Owner dashboard)
+ * Saves locally and syncs to backend API
  */
-export const addEquipment = (equipmentData) => {
+export const addEquipment = async (equipmentData) => {
   try {
     const list = getEquipments();
     const newEquipment = {
@@ -148,6 +250,46 @@ export const addEquipment = (equipmentData) => {
     };
     list.unshift(newEquipment);
     localStorage.setItem(STORAGE_KEY_EQUIPMENTS, JSON.stringify(list));
+
+    // Also attempt to push to live backend API
+    try {
+      const apiPayload = {
+        provider_id: equipmentData.provider_id || equipmentData.ownerId,
+        equipment_type: equipmentData.name ? `${equipmentData.category} - ${equipmentData.name}` : equipmentData.category,
+        service_area: equipmentData.location,
+        base_price: Number(equipmentData.dailyRate) || 0,
+        price_basis: equipmentData.priceBasis || "per_day",
+        includes_operator: Boolean(equipmentData.specs?.operator === "Included"),
+        includes_fuel: Boolean(equipmentData.specs?.fuel === "Fuel Included"),
+        is_active: equipmentData.available !== false,
+      };
+
+      console.log(">>> [LIVE API POST EQUIPMENT]", apiPayload);
+      const res = await fetch(`${API_BASE_URL}/api/v1/equipment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(apiPayload),
+      });
+
+      if (res.ok) {
+        const resData = await res.json();
+        console.log("<<< [LIVE API POST EQUIPMENT SUCCESS]", resData);
+        const createdId = resData?.id || resData?.data?.id;
+        if (createdId) {
+          newEquipment.id = createdId;
+          newEquipment._source = "live";
+          localStorage.setItem(STORAGE_KEY_EQUIPMENTS, JSON.stringify(list));
+        }
+      }
+    } catch (apiErr) {
+      console.warn("[ADD EQUIPMENT] Backend sync note:", apiErr.message);
+    }
+
+    // Trigger update event across tabs & components
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("agrirent_equipment_updated"));
+    }
+
     return newEquipment;
   } catch (error) {
     console.error("Error adding equipment:", error);
@@ -252,20 +394,20 @@ export const getRentalRequests = () => {
 
 /**
  * Place a new equipment rental request.
- * For live API equipment (item._source === "live"), also fires POST /api/v1/bookings.
- * Always stores the request in session for My Requests tracking.
+ * Saves to both localStorage and sessionStorage so all users and owner portals receive it.
+ * For live API equipment, also fires POST /api/v1/bookings to backend database.
  */
 export const createRentalRequest = async (requestData) => {
-  // Build the local request record first
+  // Build the request record
   const localRequest = {
     ...requestData,
-    id: `REQ-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
-    status: "Pending",
+    id: requestData.id || `REQ-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
+    status: requestData.status || "Pending",
     createdAt: new Date().toISOString(),
   };
 
-  // If this is a live-API equipment, fire a real booking to the backend
-  if (requestData._isLiveEquipment && requestData.farmerId && requestData.equipmentId) {
+  // If this is a live-API equipment or has live IDs, fire booking to backend API
+  if (requestData.equipmentId && (requestData._isLiveEquipment || requestData.farmerId)) {
     try {
       const bookingPayload = {
         farmer_id: requestData.farmerId,
@@ -283,35 +425,98 @@ export const createRentalRequest = async (requestData) => {
         body: JSON.stringify(bookingPayload),
       });
 
-      const result = await response.json();
-      console.log("<<< [LIVE API BOOKING RESPONSE]", result);
-
       if (response.ok) {
-        // Enrich local record with backend response data
+        const result = await response.json();
+        console.log("<<< [LIVE API BOOKING RESPONSE]", result);
         localRequest.id = result.id || localRequest.id;
-        localRequest.agreedTotalCost = result.agreed_total_cost;
-        localRequest.status = result.status === "pending" ? "Pending" : result.status;
+        localRequest.agreedTotalCost = result.agreed_total_cost || localRequest.totalAmount;
+        localRequest.status = result.status === "pending" ? "Pending" : result.status || "Pending";
         localRequest._bookingId = result.id;
-        console.log("[BOOKING] Created on backend with id:", result.id);
-      } else {
-        console.warn("[BOOKING] Backend responded with error:", result);
       }
     } catch (err) {
-      console.warn("[BOOKING] Live API booking failed, saved locally only:", err.message);
+      console.warn("[BOOKING] Live API booking note:", err.message);
     }
   }
 
-  // Store in session for My Requests tab (session clears on browser close)
+  // 1. Save to persistent localStorage so Equipment Owner receives it across tabs/sessions
+  try {
+    const localRequests = JSON.parse(localStorage.getItem(STORAGE_KEY_REQUESTS) || "[]");
+    const filtered = localRequests.filter((r) => r.id !== localRequest.id);
+    filtered.unshift(localRequest);
+    localStorage.setItem(STORAGE_KEY_REQUESTS, JSON.stringify(filtered));
+  } catch (err) {
+    console.warn("[REQUEST] Could not save to localStorage:", err.message);
+  }
+
+  // 2. Also save to sessionStorage for instant farmer tab tracking
   try {
     const SESSION_KEY = "agrirent_session_requests";
     const existing = JSON.parse(sessionStorage.getItem(SESSION_KEY) || "[]");
-    existing.unshift(localRequest);
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(existing));
+    const filteredSession = existing.filter((r) => r.id !== localRequest.id);
+    filteredSession.unshift(localRequest);
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(filteredSession));
   } catch (err) {
-    console.warn("[REQUEST] Could not save to session storage:", err.message);
+    console.warn("[REQUEST] Could not save to sessionStorage:", err.message);
+  }
+
+  // 3. Broadcast sync events across all active windows/tabs
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("agrirent_request_created"));
+    window.dispatchEvent(new Event("storage"));
   }
 
   return localRequest;
+};
+
+/**
+ * Fetch all rental requests with live backend bookings support
+ */
+export const fetchAllRentalRequests = async () => {
+  const localRequests = getRentalRequests();
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/v1/bookings`);
+    if (res.ok) {
+      const data = await res.json();
+      const rawList = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.data)
+        ? data.data
+        : Array.isArray(data?.bookings)
+        ? data.bookings
+        : [];
+
+      const liveRequests = rawList.map((b) => ({
+        id: String(b.id),
+        equipmentId: String(b.equipment_id),
+        equipmentName: b.equipment_name || "Agricultural Equipment",
+        category: b.category || "Tractor",
+        farmerId: b.farmer_id,
+        farmerName: b.farmer_name || b.farmer?.full_name || "Farmer",
+        farmerPhone: b.farmer_phone || b.farmer?.phone_number || "",
+        farmerEmail: b.farmer_email || b.farmer?.email || "",
+        ownerEmail: b.provider_email || b.provider?.email || "",
+        ownerName: b.provider_name || b.provider?.full_name || "",
+        provider_id: b.provider_id,
+        farmLocation: b.service_location || "Farm location",
+        farmSizeHectares: b.farm_size_hectares || 1,
+        startDate: b.preferred_start_date || "",
+        notes: b.notes || "",
+        status: b.status === "pending" ? "Pending" : b.status || "Pending",
+        totalAmount: b.agreed_total_cost || 0,
+        createdAt: b.created_at || new Date().toISOString(),
+        _source: "live",
+      }));
+
+      const liveIds = new Set(liveRequests.map((r) => r.id));
+      const filteredLocal = localRequests.filter((r) => !liveIds.has(String(r.id)));
+      return [...liveRequests, ...filteredLocal];
+    }
+  } catch (err) {
+    console.warn("[BOOKINGS] Backend fetch note:", err.message);
+  }
+
+  return localRequests;
 };
 
 /**

@@ -29,19 +29,29 @@ const FarmerEquipmentRental = ({
   // Filtered equipment list
   const filteredEquipments = useMemo(() => {
     return equipments.filter((item) => {
+      if (!item) return false;
+      const q = (searchQuery || "").toLowerCase().trim();
+      const name = (item.name || "").toLowerCase();
+      const location = (item.location || "").toLowerCase();
+      const ownerName = (item.ownerName || "").toLowerCase();
+      const category = (item.category || "").toLowerCase();
+
       const matchesSearch =
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.ownerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.category.toLowerCase().includes(searchQuery.toLowerCase());
+        !q ||
+        name.includes(q) ||
+        location.includes(q) ||
+        ownerName.includes(q) ||
+        category.includes(q);
 
       const matchesCategory =
         selectedCategory === "All" ||
-        item.category.toLowerCase() === selectedCategory.toLowerCase();
+        category === selectedCategory.toLowerCase() ||
+        category.includes(selectedCategory.toLowerCase());
 
+      const isItemAvailable = item.available !== false;
       const matchesAvailability =
         availabilityFilter === "all" ||
-        (availabilityFilter === "available" && item.available);
+        (availabilityFilter === "available" && isItemAvailable);
 
       return matchesSearch && matchesCategory && matchesAvailability;
     });
