@@ -93,6 +93,7 @@ const FarmerBookingModal = ({
       equipmentImage: equipment.image,
       category: equipment.category,
       ownerName: equipment.ownerName,
+      ownerEmail: equipment.ownerEmail,
       ownerPhone: equipment.ownerPhone,
       location: equipment.location,
       farmerName: currentUser?.name || currentUser?.full_name || "Farmer User",

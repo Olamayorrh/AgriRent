@@ -12,232 +12,43 @@ export const API_BASE_URL = "https://agrirent-api.onrender.com";
 const STORAGE_KEY_EQUIPMENTS = "agrirent_equipments";
 const STORAGE_KEY_REQUESTS = "agrirent_rental_requests";
 
-// Initial mock equipment listings uploaded by Equipment Owners
-const DEFAULT_EQUIPMENTS = [
-  {
-    id: "EQ-101",
-    name: "John Deere 5075E 4WD Tractor",
-    category: "Tractor",
-    ownerName: "Alhaji Ibrahim Danladi",
-    ownerPhone: "+234 803 123 4567",
-    location: "Ibadan, Oyo State",
-    dailyRate: 65000,
-    hourlyRate: 8500,
-    specs: {
-      power: "75 HP",
-      fuel: "Diesel",
-      transmission: "12F/12R PowrReverser",
-      drive: "4WD",
-    },
-    condition: "Excellent",
-    available: true,
-    rating: 4.9,
-    reviewsCount: 28,
-    image: tractorImage,
-    description: "Heavy-duty 75HP tractor ideal for large-scale tilling, plowing, and heavy haulage. Comes with GPS guidance and operator option.",
-  },
-  {
-    id: "EQ-102",
-    name: "Massey Ferguson Activa Combine Harvester",
-    category: "Harvester",
-    ownerName: "Babatunde Agro Ventures",
-    ownerPhone: "+234 802 987 6543",
-    location: "Abeokuta, Ogun State",
-    dailyRate: 140000,
-    hourlyRate: 18000,
-    specs: {
-      power: "175 HP",
-      fuel: "Diesel",
-      grainTank: "5,200 Litres",
-      width: "4.8m Cutting Bar",
-    },
-    condition: "Good",
-    available: true,
-    rating: 4.8,
-    reviewsCount: 19,
-    image: harvesterImage,
-    description: "High-efficiency multi-crop combine harvester suitable for rice, maize, wheat, and soybeans. Low grain loss guarantee.",
-  },
-  {
-    id: "EQ-103",
-    name: "AgroMaster High-Clearance Boom Sprayer",
-    category: "Sprayer",
-    ownerName: "Oluwaseun Machinery Hub",
-    ownerPhone: "+234 814 555 8920",
-    location: "Akure, Ondo State",
-    dailyRate: 35000,
-    hourlyRate: 5000,
-    specs: {
-      capacity: "800 Litres",
-      boomWidth: "12m",
-      pressure: "40 Bar",
-      fuel: "Petrol Engine",
-    },
-    condition: "Like New",
-    available: true,
-    rating: 4.7,
-    reviewsCount: 14,
-    image: boomSprayerImage,
-    description: "Precision motorized boom sprayer for chemical fertilizer, herbicide, and pesticide application over wide acreage in record time.",
-  },
-  {
-    id: "EQ-104",
-    name: "Heavy-Duty Disc Harrow & Rotary Tiller",
-    category: "Tiller & Harrow",
-    ownerName: "Kwara Farm Equipment Hub",
-    ownerPhone: "+234 806 333 4455",
-    location: "Ilorin, Kwara State",
-    dailyRate: 28000,
-    hourlyRate: 4000,
-    specs: {
-      discs: "24 Notched Discs",
-      workingWidth: "2.4m",
-      depth: "200mm",
-      hitch: "Category 2 Three-Point",
-    },
-    condition: "Good",
-    available: true,
-    rating: 4.6,
-    reviewsCount: 22,
-    image: ploughImage,
-    description: "Robust 24-disc harrow and rotavator attachment built to break tough clay and virgin soil ready for direct planting.",
-  },
-  {
-    id: "EQ-105",
-    name: "4-Row Pneumatic Precision Planter",
-    category: "Planter",
-    ownerName: "Adeyemi Modern Farms",
-    ownerPhone: "+234 809 777 1122",
-    location: "Osogbo, Osun State",
-    dailyRate: 42000,
-    hourlyRate: 6000,
-    specs: {
-      rows: "4 Rows Adjustable",
-      seedTypes: "Maize, Soya, Cowpea",
-      fertilizerHopper: "Included",
-      speed: "8 - 10 km/h",
-    },
-    condition: "Excellent",
-    available: false,
-    rating: 4.9,
-    reviewsCount: 16,
-    image: planterImage,
-    description: "Uniform seed depth and distance placement pneumatic seeder. Drastically increases germination rates and yields.",
-  },
-  {
-    id: "EQ-106",
-    name: "Square Hay & Straw Baler",
-    category: "Baler",
-    ownerName: "Midwest Agri Logistic",
-    ownerPhone: "+234 805 444 3322",
-    location: "Benin City, Edo State",
-    dailyRate: 38000,
-    hourlyRate: 5500,
-    specs: {
-      baleSize: "36x46 cm",
-      pickupWidth: "1.8m",
-      knotter: "Heavy-Duty Twine",
-      output: "80 - 100 bales/hr",
-    },
-    condition: "Good",
-    available: true,
-    rating: 4.8,
-    reviewsCount: 11,
-    image: hayStrawMachine,
-    description: "Fast baling of crop residues, hay, and silage for cattle feeds and easy farm transport.",
-  },
-];
+// Initial equipment listings uploaded by Equipment Owners: empty by default so counting starts strictly from backend / owner posts
+const DEFAULT_EQUIPMENTS = [];
 
-// Initial starter requests to demonstrate request status tracking on both ends
-const DEFAULT_REQUESTS = [
-  {
-    id: "REQ-2026-001",
-    equipmentId: "EQ-101",
-    equipmentName: "John Deere 5075E 4WD Tractor",
-    equipmentImage: tractorImage,
-    category: "Tractor",
-    ownerName: "Alhaji Ibrahim Danladi",
-    ownerPhone: "+234 803 123 4567",
-    location: "Ibadan, Oyo State",
-    farmerName: "Mayowa Olaniyan",
-    farmerEmail: "farmer@agrirent.com",
-    farmerPhone: "+234 801 234 5678",
-    farmLocation: "Plot 4, Green Valley Farm, Oyo",
-    startDate: "2026-11-10",
-    endDate: "2026-11-14",
-    durationDays: 4,
-    dailyRate: 65000,
-    totalAmount: 260000,
-    deliveryOption: "Delivery to Farm",
-    notes: "Requires deep soil plowing for 15 hectares before the upcoming rainfall.",
-    status: "Approved", // "Pending" | "Approved" | "In Use" | "Completed" | "Declined" | "Cancelled"
-    createdAt: "2026-11-02T10:30:00Z",
-  },
-  {
-    id: "REQ-2026-002",
-    equipmentId: "EQ-103",
-    equipmentName: "AgroMaster High-Clearance Boom Sprayer",
-    equipmentImage: boomSprayerImage,
-    category: "Sprayer",
-    ownerName: "Oluwaseun Machinery Hub",
-    ownerPhone: "+234 814 555 8920",
-    location: "Akure, Ondo State",
-    farmerName: "Mayowa Olaniyan",
-    farmerEmail: "farmer@agrirent.com",
-    farmerPhone: "+234 801 234 5678",
-    farmLocation: "Osun River Basin Farm, Osun",
-    startDate: "2026-11-18",
-    endDate: "2026-11-19",
-    durationDays: 2,
-    dailyRate: 35000,
-    totalAmount: 70000,
-    deliveryOption: "Self-Pickup",
-    notes: "Scheduled herbicide application on maize seedlings.",
-    status: "Pending",
-    createdAt: "2026-11-03T14:15:00Z",
-  },
-  {
-    id: "REQ-2026-003",
-    equipmentId: "EQ-104",
-    equipmentName: "Heavy-Duty Disc Harrow & Rotary Tiller",
-    equipmentImage: ploughImage,
-    category: "Tiller & Harrow",
-    ownerName: "Kwara Farm Equipment Hub",
-    ownerPhone: "+234 806 333 4455",
-    location: "Ilorin, Kwara State",
-    farmerName: "Mayowa Olaniyan",
-    farmerEmail: "farmer@agrirent.com",
-    farmerPhone: "+234 801 234 5678",
-    farmLocation: "Plot 12, Agro Estate, Kwara",
-    startDate: "2026-10-20",
-    endDate: "2026-10-23",
-    durationDays: 3,
-    dailyRate: 28000,
-    totalAmount: 84000,
-    deliveryOption: "Delivery to Farm",
-    notes: "Completed land preparation on plot 12 successfully.",
-    status: "Completed",
-    createdAt: "2026-10-18T09:00:00Z",
-  },
-];
+// Initial starter requests: empty by default so newly onboarded owners and farmers start with 0 requests
+const DEFAULT_REQUESTS = [];
 
 /**
- * Fetch all available equipments uploaded by Equipment Owners
- * NOTE: When backend API is ready, replace with:
- * const response = await axios.get(`${API_BASE_URL}/equipments`);
- * return response.data;
+ * Fetch all equipments uploaded by Equipment Owners locally or in session
  */
 export const getEquipments = () => {
   try {
+    const PURGE_FLAG = "agrirent_fleet_reset_v4";
+    if (typeof window !== "undefined" && !localStorage.getItem(PURGE_FLAG)) {
+      localStorage.removeItem(STORAGE_KEY_EQUIPMENTS);
+      localStorage.setItem(PURGE_FLAG, "true");
+      return [];
+    }
+
     const stored = localStorage.getItem(STORAGE_KEY_EQUIPMENTS);
     if (!stored) {
-      localStorage.setItem(STORAGE_KEY_EQUIPMENTS, JSON.stringify(DEFAULT_EQUIPMENTS));
-      return DEFAULT_EQUIPMENTS;
+      return [];
     }
-    return JSON.parse(stored);
+    const items = JSON.parse(stored);
+    // Purge legacy mock equipments (EQ-101 to EQ-106) and any backend dummy ids
+    const cleaned = items.filter(
+      (item) =>
+        item &&
+        item.id !== "6e4de458-ff55-42b9-96f1-41793130cdef" &&
+        !["EQ-101", "EQ-102", "EQ-103", "EQ-104", "EQ-105", "EQ-106"].includes(item.id)
+    );
+    if (cleaned.length !== items.length) {
+      localStorage.setItem(STORAGE_KEY_EQUIPMENTS, JSON.stringify(cleaned));
+    }
+    return cleaned;
   } catch (error) {
     console.error("Error reading equipments:", error);
-    return DEFAULT_EQUIPMENTS;
+    return [];
   }
 };
 
@@ -261,10 +72,12 @@ export const resolveEquipmentImage = (equipmentType) => {
  */
 const normalizeLiveEquipment = (apiItem) => ({
   id: apiItem.id,
+  provider_id: apiItem.provider_id,
   name: apiItem.equipment_type || "Agricultural Equipment",
   category: (apiItem.equipment_type || "").split(" - ")[0] || "Tractor",
-  ownerName: apiItem.provider_name || "Verified Equipment Owner",
+  ownerName: apiItem.provider_name || "Equipment Owner",
   ownerPhone: apiItem.provider_phone || "+234 800 000 0000",
+  ownerEmail: apiItem.provider_email || apiItem.email || "",
   location: apiItem.service_area || "Nigeria",
   dailyRate: apiItem.base_price || 0,
   priceBasis: apiItem.price_basis || "per_day",
@@ -276,7 +89,7 @@ const normalizeLiveEquipment = (apiItem) => ({
       fuel: apiItem.includes_fuel ? "Fuel Included" : "Fuel Extra",
     }),
   },
-  condition: "Verified",
+  condition: "Good",
   available: apiItem.is_active !== false,
   rating: null,
   reviewsCount: null,
@@ -288,31 +101,30 @@ const normalizeLiveEquipment = (apiItem) => ({
 });
 
 /**
- * Fetch equipment listings from live API, then merge with mock catalog.
- * Live API items appear first; mock items fill in the rest.
- * Falls back gracefully to mock catalog if the API is unreachable.
+ * Fetch equipment listings for marketplace.
+ * Connects to live API and merges with owner-posted equipments from local storage,
+ * while strictly filtering out legacy dummy data so the marketplace starts clean
+ * with only genuine owner-posted machinery.
  */
 export const fetchMarketplaceEquipments = async () => {
   try {
-    console.log(">>> [LIVE API REQUEST] GET /api/v1/equipment");
     const response = await fetch(`${API_BASE_URL}/api/v1/equipment`);
-
-    if (!response.ok) {
-      throw new Error(`API responded with status ${response.status}`);
+    if (response.ok) {
+      const data = await response.json();
+      // Exclude the stubborn hardcoded dummy equipment from backend
+      const liveItems = Array.isArray(data)
+        ? data
+            .filter((item) => item.id !== "6e4de458-ff55-42b9-96f1-41793130cdef")
+            .map(normalizeLiveEquipment)
+        : [];
+      const liveIds = new Set(liveItems.map((e) => e.id));
+      const localEquipments = getEquipments();
+      const nonDuplicateLocal = localEquipments.filter((e) => !liveIds.has(e.id));
+      return [...liveItems, ...nonDuplicateLocal];
     }
-
-    const data = await response.json();
-    console.log("<<< [LIVE API RESPONSE] Equipment list:", data);
-
-    const liveItems = Array.isArray(data) ? data.map(normalizeLiveEquipment) : [];
-    const liveIds = new Set(liveItems.map((e) => e.id));
-
-    // Merge: live items first, then local/mock items that don't share the same ID
-    const localEquipments = getEquipments();
-    const mockItems = localEquipments.filter((e) => !liveIds.has(e.id));
-    return [...liveItems, ...mockItems];
+    return getEquipments();
   } catch (error) {
-    console.warn("[MARKETPLACE] Live API fetch failed, using mock catalog:", error.message);
+    console.warn("[MARKETPLACE] Live API fetch failed, using local catalog:", error.message);
     return getEquipments();
   }
 };
@@ -410,17 +222,31 @@ export const toggleEquipmentAvailability = (equipmentId) => {
  */
 export const getRentalRequests = () => {
   try {
-    // Pull any new bookings saved to session during this visit
     const SESSION_KEY = "agrirent_session_requests";
     const sessionRequests = JSON.parse(sessionStorage.getItem(SESSION_KEY) || "[]");
+    const localRequests = JSON.parse(localStorage.getItem(STORAGE_KEY_REQUESTS) || "[]");
 
-    // Merge with default demo requests; session items take priority at the top
-    const sessionIds = new Set(sessionRequests.map((r) => r.id));
-    const baseRequests = DEFAULT_REQUESTS.filter((r) => !sessionIds.has(r.id));
-    return [...sessionRequests, ...baseRequests];
+    // Filter out any legacy dummy requests if present
+    const cleanSession = sessionRequests.filter(
+      (r) => !["REQ-2026-001", "REQ-2026-002", "REQ-2026-003"].includes(r.id)
+    );
+    if (cleanSession.length !== sessionRequests.length) {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(cleanSession));
+    }
+
+    const cleanLocal = localRequests.filter(
+      (r) => !["REQ-2026-001", "REQ-2026-002", "REQ-2026-003"].includes(r.id)
+    );
+    if (cleanLocal.length !== localRequests.length) {
+      localStorage.setItem(STORAGE_KEY_REQUESTS, JSON.stringify(cleanLocal));
+    }
+
+    const sessionIds = new Set(cleanSession.map((r) => r.id));
+    const merged = [...cleanSession, ...cleanLocal.filter((r) => !sessionIds.has(r.id))];
+    return merged;
   } catch (error) {
     console.error("Error reading rental requests:", error);
-    return DEFAULT_REQUESTS;
+    return [];
   }
 };
 

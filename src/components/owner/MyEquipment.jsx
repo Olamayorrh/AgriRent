@@ -208,6 +208,23 @@ const MyEquipment = ({
             </div>
           ))}
         </div>
+      ) : equipments.length === 0 ? (
+        <div className="bg-white rounded-3xl border border-gray-100 p-12 text-center space-y-3">
+          <TractorIcon className="w-14 h-14 mx-auto text-gray-300" />
+          <h3 className="text-base font-bold text-gray-900">No equipment in your fleet yet</h3>
+          <p className="text-xs text-gray-500 max-w-sm mx-auto">
+            You haven&apos;t posted any machinery yet. Click &quot;Post New Equipment&quot; to publish your first machine to the marketplace.
+          </p>
+          <div className="flex items-center justify-center pt-2">
+            <button
+              onClick={onOpenPostModal}
+              className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-[var(--secondary-color)] hover:bg-[#143225] shadow-xs hover:shadow transition-all cursor-pointer flex items-center gap-2"
+            >
+              <PlusIcon className="w-4 h-4 text-[var(--primary-color)]" />
+              <span>Post New Equipment</span>
+            </button>
+          </div>
+        </div>
       ) : filteredEquipments.length === 0 ? (
         <div className="bg-white rounded-3xl border border-gray-100 p-12 text-center space-y-3">
           <TractorIcon className="w-14 h-14 mx-auto text-gray-300" />
@@ -313,7 +330,7 @@ const MyEquipment = ({
                         </span>
                       )}
                       <span className="text-[10px] xl:text-[11px] px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-medium">
-                        {item.condition || "Verified"}
+                        {item.condition || "Good"}
                       </span>
                     </div>
                   )}

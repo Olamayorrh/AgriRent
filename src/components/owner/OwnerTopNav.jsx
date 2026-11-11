@@ -88,32 +88,6 @@ const OwnerTopNav = ({
 
       {/* Right: Actions */}
       <div className="flex items-center gap-2 sm:gap-4">
-        {/* DB Status Badge */}
-        <button
-          onClick={onRefreshData}
-          title={isDbLoading ? "Syncing with database..." : "Database live – click to refresh"}
-          className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-[10px] xl:text-xs font-semibold transition-all cursor-pointer ${
-            isDbLoading
-              ? "bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
-              : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
-          }`}
-        >
-          {isDbLoading ? (
-            <>
-              <span className="w-2.5 h-2.5 rounded-full border-2 border-amber-500 border-t-transparent animate-spin shrink-0" />
-              <span>Syncing...</span>
-            </>
-          ) : (
-            <>
-              <span className="relative flex h-2 w-2 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-              </span>
-              <span>DB Live</span>
-            </>
-          )}
-        </button>
-
         {/* Post Equipment Quick Button */}
         <button
           onClick={onOpenPostModal || (() => setActiveNav("my-equipment"))}

@@ -85,15 +85,10 @@ const FarmerSideNav = ({
         </div>
 
         {/* User Role Tag */}
-        <div className="mt-4 mb-6 px-3 py-2 rounded-xl bg-emerald-50/70 border border-emerald-100 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-800">
-              Farmer Portal
-            </span>
-          </div>
-          <span className="text-[11px] text-emerald-600 bg-white px-2 py-0.5 rounded-full font-medium border border-emerald-100">
-            Verified
+        <div className="mt-4 mb-6 px-3 py-2 rounded-xl bg-emerald-50/70 border border-emerald-100 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-emerald-800">
+            Farmer Portal
           </span>
         </div>
 

@@ -33,14 +33,14 @@ const OwnerEarnings = ({ requests = [], myEquipments = [] }) => {
       ? Math.round((inProgressRequests.length / totalListings) * 100)
       : 0;
 
-  // Monthly mock revenue distribution
+  // Monthly revenue distribution based on actual completed rentals (zero by default)
   const monthlyData = [
-    { month: "Jun", amount: 180000, height: "45%" },
-    { month: "Jul", amount: 240000, height: "60%" },
-    { month: "Aug", amount: 310000, height: "75%" },
-    { month: "Sep", amount: 220000, height: "55%" },
-    { month: "Oct", amount: 414000, height: "90%" },
-    { month: "Nov", amount: totalEarnings || 330000, height: "85%" },
+    { month: "Jun", amount: 0, height: "8%" },
+    { month: "Jul", amount: 0, height: "8%" },
+    { month: "Aug", amount: 0, height: "8%" },
+    { month: "Sep", amount: 0, height: "8%" },
+    { month: "Oct", amount: 0, height: "8%" },
+    { month: "Nov", amount: totalEarnings, height: totalEarnings > 0 ? "85%" : "8%" },
   ];
 
   return (
@@ -186,7 +186,7 @@ const OwnerEarnings = ({ requests = [], myEquipments = [] }) => {
           <div className="space-y-3">
             <h3 className="text-base sm:text-lg font-bold text-gray-900">Payout Settlement</h3>
             <p className="text-xs text-gray-500 leading-relaxed">
-              Rentals paid through AgriRent Escrow are disbursed directly to your verified commercial
+              Rentals paid through AgriRent Escrow are disbursed directly to your commercial
               bank account within 24 hours of farm completion.
             </p>
 
@@ -195,7 +195,7 @@ const OwnerEarnings = ({ requests = [], myEquipments = [] }) => {
               <p className="text-sm font-bold text-gray-900">First Bank of Nigeria</p>
               <p className="text-xs text-gray-600 font-mono">0123456789</p>
               <p className="text-[11px] text-emerald-700 font-medium pt-1">
-                Verified Account Name: Alhaji Ibrahim Danladi
+                Account Name: Alhaji Ibrahim Danladi
               </p>
             </div>
           </div>

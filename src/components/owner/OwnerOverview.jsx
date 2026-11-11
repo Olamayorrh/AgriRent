@@ -113,7 +113,7 @@ const OwnerOverview = ({
             </h2>
             <p className="text-xs sm:text-sm xl:text-base text-gray-200 leading-relaxed">
               Post agricultural machinery, adjust daily rental rates, control availability in
-              real-time, and manage booking requests placed by verified local farmers.
+              real-time, and manage booking requests placed by local farmers.
             </p>
           </div>
 
@@ -317,7 +317,7 @@ const OwnerOverview = ({
                     </p>
                     <p className="text-[11px] text-gray-400">
                       Condition:{" "}
-                      <span className="font-medium text-gray-700">{item.condition || "Verified"}</span>
+                      <span className="font-medium text-gray-700">{item.condition || "Good"}</span>
                     </p>
                   </div>
                 </div>

@@ -27,7 +27,7 @@ const FarmerOverview = ({
   ).length;
 
   // Available equipments list
-  const availableEquipments = equipments.filter((e) => e.available);
+  const availableEquipments = equipments.filter((e) => e.available !== false);
   const featuredEquipments = equipments.slice(0, 3);
   const recentRequests = requests.slice(0, 4);
 
@@ -91,7 +91,7 @@ const FarmerOverview = ({
               Welcome back, <span className="text-[var(--primary-color)]">{firstName}!</span>
             </h2>
             <p className="text-xs sm:text-sm xl:text-base text-gray-200 leading-relaxed">
-              Find verified tractors, harvesters, and tilling implements from trusted equipment owners.
+              Find tractors, harvesters, and tilling implements from trusted equipment owners.
               Manage your rentals and monitor real-time booking approvals.
             </p>
           </div>
@@ -200,7 +200,7 @@ const FarmerOverview = ({
             <h3 className="text-base sm:text-lg font-bold text-gray-900">
               Available Equipment Near You
             </h3>
-            <p className="text-xs text-gray-500">Verified agricultural machinery ready for booking</p>
+            <p className="text-xs text-gray-500">Agricultural machinery ready for booking</p>
           </div>
           <button
             onClick={() => onNavigate("marketplace")}
@@ -230,7 +230,15 @@ const FarmerOverview = ({
                   </div>
                 </div>
               ))
-            : featuredEquipments.map((item) => (
+            : featuredEquipments.length === 0 ? (
+                <div className="col-span-full bg-white rounded-2xl border border-gray-100 p-8 text-center space-y-2">
+                  <TractorIcon className="w-10 h-10 mx-auto text-gray-300" />
+                  <p className="text-sm font-semibold text-gray-700">No machinery available in marketplace yet</p>
+                  <p className="text-xs text-gray-400">
+                    Equipment posted by machinery providers will appear here once listed.
+                  </p>
+                </div>
+              ) : featuredEquipments.map((item) => (
             <div
               key={item.id}
               className="bg-white rounded-2xl border border-gray-100 shadow-xs hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col justify-between group"

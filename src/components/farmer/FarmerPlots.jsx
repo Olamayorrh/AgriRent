@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { toast } from "react-toastify";
 import {
   SproutIcon,
@@ -18,174 +18,57 @@ import {
 } from "./FarmerIcons";
 
 const FarmerPlots = ({ currentUser, requests = [], onNavigate }) => {
-  // Active farm plots matching the design in the user image
-  const [plots, setPlots] = useState([
-    {
-      id: "plot-a",
-      name: "Plot A: Maize",
-      crop: "Maize",
-      acres: "2.5 acres",
-      phase: "Vegetative stage",
-      progress: 48, // percentage for progress bar
-      isFeatured: true, // dark green card as shown in mockup
-      plantedDate: "2026-09-15",
-      estimatedHarvestDate: "2026-12-10",
-      harvestWindow: "Mid-December",
-      soilType: "Loamy soil",
-    },
-    {
-      id: "plot-b",
-      name: "Plot B: Beans",
-      crop: "Beans",
-      acres: "1.8 acres",
-      phase: "Planting phase",
-      progress: 24,
-      isFeatured: false,
-      plantedDate: "2026-10-18",
-      estimatedHarvestDate: "2027-01-05",
-      harvestWindow: "Early January",
-      soilType: "Sandy-loam",
-    },
-    {
-      id: "riverside",
-      name: "Riverside Field: Wheat",
-      crop: "Wheat",
-      acres: "4.2 acres",
-      phase: "Grain filling",
-      progress: 78,
-      isFeatured: false,
-      plantedDate: "2026-08-20",
-      estimatedHarvestDate: "2026-11-24",
-      harvestWindow: "Late November (18 days)",
-      soilType: "Alluvial river basin",
-    },
-  ]);
+  // Active farm plots - empty by default pending farmer input
+  const [plots, setPlots] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("agrirent_farmer_plots") || "[]");
+    } catch {
+      return [];
+    }
+  });
 
-  // Upcoming Farm Tasks matching the user image
-  const [tasks, setTasks] = useState([
-    {
-      id: "task-1",
-      day: "20",
-      month: "Oct",
-      title: "Irrigate maize",
-      subtitle: "Plot A: 6:30 AM",
-      plotId: "plot-a",
-      category: "Irrigation",
-      completed: false,
-    },
-    {
-      id: "task-2",
-      day: "22",
-      month: "Oct",
-      title: "Plant bean seed",
-      subtitle: "Plot B: Planting crew",
-      plotId: "plot-b",
-      category: "Planting",
-      completed: false,
-    },
-    {
-      id: "task-3",
-      day: "28",
-      month: "Oct",
-      title: "Prepare for harvest",
-      subtitle: "Riverside Field: Wheat",
-      plotId: "riverside",
-      category: "Harvest Prep",
-      completed: false,
-    },
-  ]);
+  // Upcoming Farm Tasks - empty by default pending farmer input
+  const [tasks, setTasks] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("agrirent_farmer_tasks") || "[]");
+    } catch {
+      return [];
+    }
+  });
 
-  // Comprehensive farming processes, purchases, rentals, and activity logs
-  const [processes, setProcesses] = useState([
-    {
-      id: "PROC-101",
-      title: "Massey Ferguson 75HP Plowing & Harrowing Rental",
-      category: "Equipment Rental",
-      plotName: "Plot A: Maize",
-      status: "Done", // "Done" | "Purchased" | "Planned" | "In Progress"
-      amountSpent: 260000,
-      date: "2026-09-12",
-      nextHarvestPeriod: "Dec 2026",
-      notes: "Contracted with Alhaji Ibrahim Danladi; completed 15 ha plowing.",
-    },
-    {
-      id: "PROC-102",
-      title: "Hybrid Seed Maize (SC510 - 25 Bags)",
-      category: "Recent Purchase",
-      plotName: "Plot A: Maize",
-      status: "Purchased",
-      amountSpent: 185000,
-      date: "2026-09-14",
-      nextHarvestPeriod: "Dec 10, 2026",
-      notes: "Purchased from Premier Seeds Ibadan; high germination rate.",
-    },
-    {
-      id: "PROC-103",
-      title: "NPK 15-15-15 Compound Fertilizer (30 Bags)",
-      category: "Recent Purchase",
-      plotName: "Plot A: Maize",
-      status: "Purchased",
-      amountSpent: 390000,
-      date: "2026-10-02",
-      nextHarvestPeriod: "Dec 2026",
-      notes: "Basal dressing applied during second week after emergence.",
-    },
-    {
-      id: "PROC-104",
-      title: "Boom Sprayer Rental for Pre-Emergence Herbicide",
-      category: "Equipment Rental",
-      plotName: "Plot B: Beans",
-      status: "Done",
-      amountSpent: 70000,
-      date: "2026-10-19",
-      nextHarvestPeriod: "Jan 2027",
-      notes: "Weed control sprayed across 1.8 acres prior to germination.",
-    },
-    {
-      id: "PROC-105",
-      title: "Certified Brown Bean Seed Stock (40kg)",
-      category: "Recent Purchase",
-      plotName: "Plot B: Beans",
-      status: "Purchased",
-      amountSpent: 65000,
-      date: "2026-10-16",
-      nextHarvestPeriod: "Jan 05, 2027",
-      notes: "Direct sowing with planting crew on Plot B.",
-    },
-    {
-      id: "PROC-106",
-      title: "Combine Harvester Rental for Wheat Field",
-      category: "Equipment Rental",
-      plotName: "Riverside Field: Wheat",
-      status: "Planned",
-      amountSpent: 140000,
-      date: "2026-11-24",
-      nextHarvestPeriod: "Nov 24, 2026",
-      notes: "Scheduled with Babatunde Agro for 4.2 acres wheat harvesting.",
-    },
-    {
-      id: "PROC-107",
-      title: "Square Baler Hire for Wheat Straw Residue",
-      category: "Equipment Rental",
-      plotName: "Riverside Field: Wheat",
-      status: "Planned",
-      amountSpent: 76000,
-      date: "2026-11-26",
-      nextHarvestPeriod: "Nov 2026",
-      notes: "To bale 100+ bundles of crop residues for livestock feed sale.",
-    },
-    {
-      id: "PROC-108",
-      title: "Urea 46% Top Dressing Application",
-      category: "Planned Activity",
-      plotName: "Plot A: Maize",
-      status: "Planned",
-      amountSpent: 95000,
-      date: "2026-10-25",
-      nextHarvestPeriod: "Dec 2026",
-      notes: "Scheduled during tasseling stage.",
-    },
-  ]);
+  // Comprehensive farming processes, purchases, rentals, and activity logs - empty by default
+  const [processes, setProcesses] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("agrirent_farmer_processes") || "[]");
+    } catch {
+      return [];
+    }
+  });
+
+  // Persist farm management data locally
+  useEffect(() => {
+    try {
+      localStorage.setItem("agrirent_farmer_plots", JSON.stringify(plots));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [plots]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("agrirent_farmer_tasks", JSON.stringify(tasks));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [tasks]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("agrirent_farmer_processes", JSON.stringify(processes));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [processes]);
 
   // Modal visibility states
   const [showAddProcessModal, setShowAddProcessModal] = useState(false);
@@ -254,6 +137,29 @@ const FarmerPlots = ({ currentUser, requests = [], onNavigate }) => {
       .filter((p) => p.category === "Recent Purchase" && (p.status === "Purchased" || p.status === "Done"))
       .reduce((acc, curr) => acc + (Number(curr.amountSpent) || 0), 0);
   }, [processes]);
+
+  // Dynamic next harvesting info based on farmer inputs
+  const nextHarvestInfo = useMemo(() => {
+    const harvestProcess = processes.find(
+      (p) =>
+        (p.category === "Harvesting" || p.title.toLowerCase().includes("harvest")) &&
+        (p.nextHarvestPeriod || p.date)
+    );
+    if (harvestProcess) {
+      return {
+        date: harvestProcess.nextHarvestPeriod || harvestProcess.date,
+        detail: `${harvestProcess.plotName || "Farm Plot"} (${harvestProcess.title})`,
+      };
+    }
+    const harvestPlot = plots.find((p) => p.harvestWindow);
+    if (harvestPlot) {
+      return {
+        date: harvestPlot.harvestWindow,
+        detail: `${harvestPlot.name} (${harvestPlot.acres})`,
+      };
+    }
+    return null;
+  }, [processes, plots]);
 
   // Filtered processes based on active filter tab
   const filteredProcesses = useMemo(() => {
@@ -498,7 +404,7 @@ const FarmerPlots = ({ currentUser, requests = [], onNavigate }) => {
             ₦{totalAmountSpent.toLocaleString()}
           </p>
           <p className="text-[11px] xl:text-xs text-gray-500">
-            Verified expenses ({processes.filter((p) => p.status === "Done" || p.status === "Purchased").length} operations)
+            Recorded expenses ({processes.filter((p) => p.status === "Done" || p.status === "Purchased").length} operations)
           </p>
         </div>
 
@@ -540,10 +446,10 @@ const FarmerPlots = ({ currentUser, requests = [], onNavigate }) => {
             </div>
           </div>
           <p className="text-xl sm:text-2xl xl:text-3xl font-extrabold text-purple-900">
-            Nov 24
+            {nextHarvestInfo ? nextHarvestInfo.date : "None scheduled"}
           </p>
           <p className="text-[11px] xl:text-xs text-gray-500">
-            Riverside Field (Wheat, 4.2 acres)
+            {nextHarvestInfo ? nextHarvestInfo.detail : "Pending farmer input"}
           </p>
         </div>
       </div>
@@ -574,55 +480,63 @@ const FarmerPlots = ({ currentUser, requests = [], onNavigate }) => {
 
         {/* Active Farm Plots Cards Stack */}
         <div className="space-y-4">
-          {plots.map((plot) => {
-            const isDark = plot.isFeatured;
+          {plots.length === 0 ? (
+            <div className="p-8 text-center border-2 border-dashed border-gray-200 rounded-2xl">
+              <SproutIcon className="w-10 h-10 mx-auto text-gray-300 mb-2" />
+              <p className="text-sm font-semibold text-gray-700">No active farm plots registered yet</p>
+              <p className="text-xs text-gray-400 mt-1">Click &quot;+ Add Plot&quot; above to register your first plot</p>
+            </div>
+          ) : (
+            plots.map((plot) => {
+              const isDark = plot.isFeatured;
 
-            return (
-              <div
-                key={plot.id}
-                className={`rounded-2xl p-4 sm:p-5 transition-all duration-200 ${
-                  isDark
-                    ? "bg-[#1E3F20] text-white shadow-md"
-                    : "bg-white border border-gray-200 shadow-xs hover:border-gray-300"
-                }`}
-              >
-                {/* Card Top Row: Name on Left, Acres on Right */}
-                <div className="flex items-center justify-between">
-                  <h3
-                    className={`text-sm sm:text-base xl:text-lg font-bold ${
-                      isDark ? "text-white" : "text-[#1B4332]"
+              return (
+                <div
+                  key={plot.id}
+                  className={`rounded-2xl p-4 sm:p-5 transition-all duration-200 ${
+                    isDark
+                      ? "bg-[#1E3F20] text-white shadow-md"
+                      : "bg-white border border-gray-200 shadow-xs hover:border-gray-300"
+                  }`}
+                >
+                  {/* Card Top Row: Name on Left, Acres on Right */}
+                  <div className="flex items-center justify-between">
+                    <h3
+                      className={`text-sm sm:text-base xl:text-lg font-bold ${
+                        isDark ? "text-white" : "text-[#1B4332]"
+                      }`}
+                    >
+                      {plot.name}
+                    </h3>
+                    <span className="text-xs sm:text-sm xl:text-base font-bold text-[#D4A373]">
+                      {plot.acres}
+                    </span>
+                  </div>
+
+                  {/* Subtitle / Stage */}
+                  <p
+                    className={`text-xs xl:text-sm mt-1 ${
+                      isDark ? "text-gray-200" : "text-gray-500"
                     }`}
                   >
-                    {plot.name}
-                  </h3>
-                  <span className="text-xs sm:text-sm xl:text-base font-bold text-[#D4A373]">
-                    {plot.acres}
-                  </span>
-                </div>
+                    {plot.phase}
+                  </p>
 
-                {/* Subtitle / Stage */}
-                <p
-                  className={`text-xs xl:text-sm mt-1 ${
-                    isDark ? "text-gray-200" : "text-gray-500"
-                  }`}
-                >
-                  {plot.phase}
-                </p>
-
-                {/* Growth Stage Progress Bar */}
-                <div
-                  className={`h-2.5 xl:h-3 w-full rounded-full mt-3 overflow-hidden ${
-                    isDark ? "bg-white/20" : "bg-gray-100"
-                  }`}
-                >
+                  {/* Growth Stage Progress Bar */}
                   <div
-                    className="h-full rounded-full bg-[#D4A373] transition-all duration-500"
-                    style={{ width: `${plot.progress}%` }}
-                  />
+                    className={`h-2.5 xl:h-3 w-full rounded-full mt-3 overflow-hidden ${
+                      isDark ? "bg-white/20" : "bg-gray-100"
+                    }`}
+                  >
+                    <div
+                      className="h-full rounded-full bg-[#D4A373] transition-all duration-500"
+                      style={{ width: `${plot.progress}%` }}
+                    />
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
 
         {/* Upcoming Farm Tasks Section */}
@@ -632,52 +546,59 @@ const FarmerPlots = ({ currentUser, requests = [], onNavigate }) => {
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 xl:gap-6">
-            {tasks.map((task) => (
-              <div
-                key={task.id}
-                onClick={() => handleToggleTask(task.id)}
-                className={`flex items-center gap-3.5 xl:gap-4 p-3.5 sm:p-4 xl:p-5 rounded-2xl border transition-all cursor-pointer ${
-                  task.completed
-                    ? "bg-gray-50 border-gray-200 opacity-60"
-                    : "bg-white border-gray-200 hover:border-emerald-300 hover:shadow-xs"
-                }`}
-              >
-                {/* Date Badge with day + amber month */}
-                <div className="w-13 h-13 xl:w-16 xl:h-16 rounded-2xl bg-[#DCE7E1] flex flex-col items-center justify-center shrink-0">
-                  <span className="text-base xl:text-xl font-extrabold text-gray-900 leading-tight">
-                    {task.day}
-                  </span>
-                  <span className="text-[11px] xl:text-xs font-bold text-[#D4A373] uppercase leading-none">
-                    {task.month}
-                  </span>
-                </div>
-
-                {/* Task Details */}
-                <div className="min-w-0 flex-1">
-                  <h4
-                    className={`text-xs sm:text-sm xl:text-base font-bold truncate ${
-                      task.completed ? "line-through text-gray-400" : "text-gray-900"
-                    }`}
-                  >
-                    {task.title}
-                  </h4>
-                  <p className="text-[11px] xl:text-xs text-gray-500 truncate mt-0.5">
-                    {task.subtitle}
-                  </p>
-                </div>
-
-                {/* Checkbox indicator */}
+            {tasks.length === 0 ? (
+              <div className="col-span-full p-6 text-center border border-dashed border-gray-200 rounded-2xl">
+                <p className="text-xs sm:text-sm font-semibold text-gray-600">No upcoming farm tasks</p>
+                <p className="text-xs text-gray-400 mt-0.5">Tasks will appear as you log farm activities</p>
+              </div>
+            ) : (
+              tasks.map((task) => (
                 <div
-                  className={`w-5 h-5 xl:w-6 xl:h-6 rounded-md border flex items-center justify-center shrink-0 ${
+                  key={task.id}
+                  onClick={() => handleToggleTask(task.id)}
+                  className={`flex items-center gap-3.5 xl:gap-4 p-3.5 sm:p-4 xl:p-5 rounded-2xl border transition-all cursor-pointer ${
                     task.completed
-                      ? "bg-emerald-600 border-emerald-600 text-white"
-                      : "border-gray-300"
+                      ? "bg-gray-50 border-gray-200 opacity-60"
+                      : "bg-white border-gray-200 hover:border-emerald-300 hover:shadow-xs"
                   }`}
                 >
-                  {task.completed && <CheckIcon className="w-3.5 h-3.5 xl:w-4 xl:h-4" />}
+                  {/* Date Badge with day + amber month */}
+                  <div className="w-13 h-13 xl:w-16 xl:h-16 rounded-2xl bg-[#DCE7E1] flex flex-col items-center justify-center shrink-0">
+                    <span className="text-base xl:text-xl font-extrabold text-gray-900 leading-tight">
+                      {task.day}
+                    </span>
+                    <span className="text-[11px] xl:text-xs font-bold text-[#D4A373] uppercase leading-none">
+                      {task.month}
+                    </span>
+                  </div>
+
+                  {/* Task Details */}
+                  <div className="min-w-0 flex-1">
+                    <h4
+                      className={`text-xs sm:text-sm xl:text-base font-bold truncate ${
+                        task.completed ? "line-through text-gray-400" : "text-gray-900"
+                      }`}
+                    >
+                      {task.title}
+                    </h4>
+                    <p className="text-[11px] xl:text-xs text-gray-500 truncate mt-0.5">
+                      {task.subtitle}
+                    </p>
+                  </div>
+
+                  {/* Checkbox indicator */}
+                  <div
+                    className={`w-5 h-5 xl:w-6 xl:h-6 rounded-md border flex items-center justify-center shrink-0 ${
+                      task.completed
+                        ? "bg-emerald-600 border-emerald-600 text-white"
+                        : "border-gray-300"
+                    }`}
+                  >
+                    {task.completed && <CheckIcon className="w-3.5 h-3.5 xl:w-4 xl:h-4" />}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 

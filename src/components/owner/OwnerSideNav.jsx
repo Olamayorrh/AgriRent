@@ -64,15 +64,10 @@ const OwnerSideNav = ({
         </div>
 
         {/* Owner Role Tag */}
-        <div className="mt-4 mb-6 px-3 py-2 rounded-xl bg-amber-50/70 border border-amber-100 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-amber-800">
-              Owner Portal
-            </span>
-          </div>
-          <span className="text-[11px] text-amber-700 bg-white px-2 py-0.5 rounded-full font-medium border border-amber-100">
-            Verified
+        <div className="mt-4 mb-6 px-3 py-2 rounded-xl bg-amber-50/70 border border-amber-100 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-amber-500" />
+          <span className="text-xs font-semibold uppercase tracking-wider text-amber-800">
+            Owner Portal
           </span>
         </div>
 

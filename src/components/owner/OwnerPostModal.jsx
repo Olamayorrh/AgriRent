@@ -158,7 +158,7 @@ const OwnerPostModal = ({
       ...(editingEquipment || {}),
       name: formData.name.trim(),
       category: formData.category,
-      ownerName: currentUser?.name || currentUser?.full_name || "Verified Equipment Owner",
+      ownerName: currentUser?.name || currentUser?.full_name || "Equipment Owner",
       ownerPhone: currentUser?.number || currentUser?.phone_number || "+234 800 000 0000",
       ownerEmail: currentUser?.email || "owner@agrirent.com",
       location: formData.location.trim(),

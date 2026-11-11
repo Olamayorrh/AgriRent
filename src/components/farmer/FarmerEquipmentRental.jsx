@@ -59,7 +59,7 @@ const FarmerEquipmentRental = ({
             Machinery & Implements Posted by Owners
           </h2>
           <p className="text-xs sm:text-sm xl:text-base text-gray-500 mt-1">
-            Discover tractors, harvesters, sprayers, and implements posted by verified equipment owners. Place a request on any machinery directly.
+            Discover tractors, harvesters, sprayers, and implements posted by equipment owners. Place a request on any machinery directly.
           </p>
         </div>
 
@@ -151,6 +151,14 @@ const FarmerEquipmentRental = ({
               </div>
             </div>
           ))}
+        </div>
+      ) : equipments.length === 0 ? (
+        <div className="bg-white rounded-3xl border border-gray-100 p-12 text-center space-y-3">
+          <TractorIcon className="w-14 h-14 mx-auto text-gray-300" />
+          <h3 className="text-base font-bold text-gray-900">No machinery in the marketplace yet</h3>
+          <p className="text-xs text-gray-500 max-w-sm mx-auto">
+            Machinery posted by equipment owners will appear here for farmers to view and book.
+          </p>
         </div>
       ) : filteredEquipments.length === 0 ? (
         <div className="bg-white rounded-3xl border border-gray-100 p-12 text-center space-y-3">
@@ -245,9 +253,6 @@ const FarmerEquipmentRental = ({
                       <p className="text-[10px] xl:text-xs text-gray-400 uppercase font-semibold">Equipment Owner</p>
                       <p className="font-bold text-gray-800">{item.ownerName}</p>
                     </div>
-                    <span className="text-[11px] xl:text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">
-                      Verified Owner
-                    </span>
                   </div>
 
                   {/* Description snippet */}

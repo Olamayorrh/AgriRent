@@ -51,8 +51,25 @@ const EquipOwner = () => {
     try {
       const eqList = getEquipments();
       const reqList = getRentalRequests();
-      setMyEquipments(eqList);
-      setRequests(reqList);
+
+      // Filter fleet belonging to this owner
+      const ownerFleet = eqList.filter(
+        (e) =>
+          (e.ownerEmail && e.ownerEmail.toLowerCase() === activeUser.email?.toLowerCase()) ||
+          (e.ownerName && e.ownerName.toLowerCase() === activeUser.name?.toLowerCase())
+      );
+      const ownerEquipmentIds = new Set(ownerFleet.map((e) => e.id));
+
+      // Filter requests sent specifically for this owner's machinery (empty by default for newly onboarded owners)
+      const ownerRequests = reqList.filter(
+        (r) =>
+          (r.ownerEmail && r.ownerEmail.toLowerCase() === activeUser.email?.toLowerCase()) ||
+          (r.ownerName && r.ownerName.toLowerCase() === activeUser.name?.toLowerCase()) ||
+          (r.equipmentId && ownerEquipmentIds.has(r.equipmentId))
+      );
+
+      setMyEquipments(ownerFleet);
+      setRequests(ownerRequests);
     } catch (err) {
       console.error("Error loading equipment owner data:", err);
     } finally {

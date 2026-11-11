@@ -8,6 +8,7 @@ import {
   LogoutIcon,
   TractorIcon,
   CheckCircleIcon,
+  ClockIcon,
 } from "./FarmerIcons";
 
 const FarmerTopNav = ({
@@ -105,32 +106,6 @@ const FarmerTopNav = ({
 
       {/* Right side: Actions, Notifications & User Profile */}
       <div className="flex items-center gap-2 sm:gap-4">
-        {/* Database Sync Status Badge */}
-        <button
-          onClick={onRefreshData}
-          title={isDbLoading ? "Syncing with database..." : "Database live – click to refresh"}
-          className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-[10px] xl:text-xs font-semibold transition-all cursor-pointer ${
-            isDbLoading
-              ? "bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100"
-              : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
-          }`}
-        >
-          {isDbLoading ? (
-            <>
-              <span className="w-2.5 h-2.5 rounded-full border-2 border-amber-500 border-t-transparent animate-spin shrink-0" />
-              <span>Syncing...</span>
-            </>
-          ) : (
-            <>
-              <span className="relative flex h-2 w-2 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-              </span>
-              <span>DB Live</span>
-            </>
-          )}
-        </button>
-
         {/* Marketplace Quick Button */}
         <button
           onClick={() => setActiveNav("marketplace")}
@@ -161,52 +136,36 @@ const FarmerTopNav = ({
             <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-gray-100 py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
               <div className="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
                 <span className="text-sm font-bold text-gray-900">Notifications</span>
-                <span className="text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">
+                <span className="text-xs text-gray-500 font-medium">
                   {pendingCount} Pending Updates
                 </span>
               </div>
               <div className="max-h-72 overflow-y-auto divide-y divide-gray-50">
-                <div
-                  className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
-                  onClick={() => {
-                    setActiveNav("my-requests");
-                    setNotificationsOpen(false);
-                  }}
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="p-2 rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
-                      <CheckCircleIcon className="w-4 h-4" />
-                    </span>
-                    <div>
-                      <p className="text-xs font-semibold text-gray-900">Request Approved!</p>
-                      <p className="text-[11px] text-gray-500 mt-0.5">
-                        Alhaji Danladi approved your tractor booking for Nov 10.
-                      </p>
-                      <span className="text-[10px] text-gray-400 mt-1 block">2 hours ago</span>
+                {pendingCount === 0 ? (
+                  <div className="py-8 text-center text-xs text-gray-400">
+                    No new notifications
+                  </div>
+                ) : (
+                  <div
+                    className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
+                    onClick={() => {
+                      setActiveNav("my-requests");
+                      setNotificationsOpen(false);
+                    }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className="p-2 rounded-lg bg-amber-50 text-amber-600 shrink-0">
+                        <ClockIcon className="w-4 h-4" />
+                      </span>
+                      <div>
+                        <p className="text-xs font-semibold text-gray-900">Pending Review</p>
+                        <p className="text-[11px] text-gray-500 mt-0.5">
+                          You have {pendingCount} rental request(s) awaiting owner review.
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <div
-                  className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
-                  onClick={() => {
-                    setActiveNav("equipment-rental");
-                    setNotificationsOpen(false);
-                  }}
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="p-2 rounded-lg bg-amber-50 text-amber-600 shrink-0">
-                      <TractorIcon className="w-4 h-4" />
-                    </span>
-                    <div>
-                      <p className="text-xs font-semibold text-gray-900">New Harvester Available</p>
-                      <p className="text-[11px] text-gray-500 mt-0.5">
-                        Babatunde Agro Ventures added a 175HP Combine Harvester in Abeokuta.
-                      </p>
-                      <span className="text-[10px] text-gray-400 mt-1 block">1 day ago</span>
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
               <div className="px-4 pt-2 border-t border-gray-100 text-center">
                 <button
